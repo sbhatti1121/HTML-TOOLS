@@ -1,0 +1,917 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate Maker</title>
+
+<style>
+:root {
+  --red: #f20d20;
+  --red-dark: #bd0015;
+  --bg: #f4f4f6;
+  --panel: #ffffff;
+  --field: #fafafa;
+  --text: #111216;
+  --muted: #62656e;
+  --border: #d6d7dc;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+header {
+  padding: 22px 4%;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.brand span { color: var(--red); }
+
+header p {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 6px 0 0;
+}
+
+.app {
+  max-width: 1800px;
+  margin: auto;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 22px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 12px;
+  height: max-content;
+  box-shadow: 0 5px 20px #00000008;
+}
+
+h2 {
+  font-size: 13px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin: 0 0 15px;
+}
+
+h2:before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  margin-right: 9px;
+  background: var(--red);
+  vertical-align: -2px;
+}
+
+.section { margin-top: 24px; }
+
+label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 13px 0 6px;
+}
+
+input, textarea, button { font: inherit; }
+
+input[type="text"],
+input[type="url"],
+input[type="date"],
+textarea {
+  width: 100%;
+  background: var(--field);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px;
+  border-radius: 7px;
+  outline: none;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--red);
+}
+
+input[type="file"] {
+  width: 100%;
+  font-size: 12px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+button {
+  background: #f1f1f3;
+  border: 1px solid #d5d6db;
+  color: #17181c;
+  padding: 11px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+button:hover { border-color: var(--red); }
+
+button.primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+}
+
+button.primary:hover { background: var(--red-dark); }
+
+button.full { grid-column: 1 / -1; }
+
+.preview-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.preview-top strong {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.preview-top span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.canvas-shell {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: white;
+  overflow: auto;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.status {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 12px;
+  min-height: 16px;
+}
+
+@media (max-width: 1000px) {
+  .app { grid-template-columns: 1fr; padding: 12px; }
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+
+  body { background: white; }
+
+  header, .panel, .preview-top, .status {
+    display: none !important;
+  }
+
+  .app {
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+
+  .canvas-shell {
+    padding: 0;
+    border: 0;
+    overflow: visible;
+  }
+
+  canvas {
+    width: 100%;
+    height: auto;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">CERTIFICATE <span>STUDIO</span></div>
+  <p>Create professional certificates with custom branding and QR verification.</p>
+</header>
+
+<main class="app">
+
+<aside class="panel">
+  <h2>Certificate details</h2>
+
+  <label for="recipient">Recipient name</label>
+  <input id="recipient" type="text" value="Your Name Here" maxlength="80">
+
+  <label for="course">Course / achievement</label>
+  <input id="course" type="text" value="Cybersecurity Fundamentals" maxlength="100">
+
+  <label for="description">Certificate description</label>
+  <textarea id="description" maxlength="240">has successfully completed the course and demonstrated knowledge and skills in the field of cybersecurity.</textarea>
+
+  <div class="grid2">
+    <div>
+      <label for="date">Issue date</label>
+      <input id="date" type="date">
+    </div>
+    <div>
+      <label for="certid">Certificate ID</label>
+      <input id="certid" type="text" value="GRX-2026-001" maxlength="50">
+    </div>
+  </div>
+
+  <label for="issuer">Instructor / issuer</label>
+  <input id="issuer" type="text" value="Sameer Bhatti" maxlength="70">
+
+  <label for="role">Issuer designation</label>
+  <input id="role" type="text" value="FOUNDER & INSTRUCTOR" maxlength="70">
+
+  <label for="tagline">Footer tagline</label>
+  <input id="tagline" type="text" value="LEARN  •  PRACTICE  •  SECURE" maxlength="80">
+
+  <div class="section">
+    <h2>Custom branding</h2>
+
+    <label for="logoFile">Upload your logo</label>
+    <input id="logoFile" type="file" accept="image/*">
+
+    <div class="hint">
+      Upload your own logo. Only the uploaded graphic is displayed;
+      no text-logo fallback is added.
+    </div>
+
+    <button id="removeLogo" style="width:100%;margin-top:10px">
+      Remove logo
+    </button>
+  </div>
+
+  <div class="section">
+    <h2>QR verification</h2>
+
+    <label for="verifyUrl">Verification URL</label>
+    <input id="verifyUrl" type="url"
+      placeholder="https://example.com/verify?id=GRX-2026-001">
+
+    <div class="hint">
+      Enter a public verification URL to generate a QR code for the certificate.
+    </div>
+
+    <button class="primary" id="makeQR"
+      style="width:100%;margin-top:10px">
+      Generate verification QR
+    </button>
+  </div>
+
+  <div class="buttons">
+    <button class="primary" id="downloadPNG">Download PNG</button>
+    <button id="savePDF">Print / Save PDF</button>
+    <button id="updatePreview">Update preview</button>
+    <button id="resetForm">Reset fields</button>
+    <button class="full" id="downloadData">Download data (JSON)</button>
+  </div>
+
+  <div class="status" id="status" aria-live="polite">
+    Ready. Edit a field to update the certificate.
+  </div>
+</aside>
+
+<section class="preview-wrap">
+  <div class="preview-top">
+    <strong>LIVE CERTIFICATE PREVIEW</strong>
+    <span>Light theme · Landscape · 1600 × 1100 px</span>
+  </div>
+
+  <div class="canvas-shell">
+    <canvas id="certificate" width="1600" height="1100"></canvas>
+  </div>
+</section>
+
+</main>
+
+<div id="qrHolder" style="position:absolute;left:-99999px;top:-99999px"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const canvas = $("certificate");
+const ctx = canvas.getContext("2d");
+
+const C = {
+  red: "#f20d20",
+  bg: "#fffdfb",
+  bg2: "#f0f0f2",
+  text: "#111216",
+  secondary: "#3d4149",
+  muted: "#60636b",
+  line: "#c8c9ce",
+  texture: "#d9dade"
+};
+
+const state = {
+  logo: null,
+  qr: null,
+  qrUrl: "",
+  qrRequest: 0
+};
+
+const defaults = {
+  recipient: "Your Name Here",
+  course: "Course Name / Achievement",
+  description: "has successfully completed the course and demonstrated knowledge and skills in the field of cybersecurity.",
+  certid: "GRX-2026-001",
+  issuer: "Sameer Bhatti",
+  role: "FOUNDER & INSTRUCTOR",
+  tagline: "LEARN  •  PRACTICE  •  SECURE"
+};
+
+function status(message) {
+  $("status").textContent = message;
+}
+
+function formatDate(value) {
+  if (!value) return "Date not specified";
+
+  return new Date(value + "T12:00:00").toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+}
+
+function fitText(text, x, y, maxWidth, font, color) {
+  text = String(text || "");
+  ctx.font = font;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = color;
+
+  while (ctx.measureText(text).width > maxWidth && text.length > 4) {
+    text = text.slice(0, -2) + "…";
+  }
+
+  ctx.fillText(text, x, y);
+}
+
+function line(x1, y1, x2, y2, color, width = 2) {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+}
+
+function wrapText(text, x, y, maxWidth, lineHeight, font, color) {
+  ctx.font = font;
+
+  const words = String(text || "").trim().split(/\s+/);
+  const lines = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? current + " " + word : word;
+
+    if (ctx.measureText(candidate).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+
+  if (current) lines.push(current);
+
+  lines.slice(0, 2).forEach((textLine, i) => {
+    fitText(textLine, x, y + i * lineHeight, maxWidth, font, color);
+  });
+}
+
+function drawCircuits() {
+  ctx.save();
+  ctx.strokeStyle = C.texture;
+  ctx.lineWidth = 2;
+
+  for (const flipped of [false, true]) {
+    ctx.save();
+
+    if (flipped) {
+      ctx.translate(1600, 0);
+      ctx.scale(-1, 1);
+    }
+
+    for (let i = 0; i < 7; i++) {
+      const y = 255 + i * 70;
+
+      ctx.beginPath();
+      ctx.moveTo(24, y);
+      ctx.lineTo(90, y);
+      ctx.lineTo(133, y - 35);
+      ctx.lineTo(240, y - 35);
+      ctx.lineTo(278, y);
+      ctx.lineTo(340, y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(340, y, 5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function drawLogo() {
+  // Only draw the uploaded image. Never replace it with a text logo.
+  if (!state.logo) return;
+
+  const img = state.logo;
+  const maxW = 175;
+  const maxH = 140;
+  const ratio = Math.min(maxW / img.width, maxH / img.height);
+
+  const w = img.width * ratio;
+  const h = img.height * ratio;
+
+  ctx.drawImage(img, 1320, 35, w, h);
+}
+
+function drawFrame() {
+  ctx.strokeStyle = C.red;
+  ctx.lineWidth = 5;
+  ctx.strokeRect(18, 18, 1564, 1064);
+
+  ctx.strokeStyle = C.line;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(30, 30, 1540, 1040);
+
+  ctx.fillStyle = C.red;
+
+  ctx.beginPath();
+  ctx.moveTo(18, 18);
+  ctx.lineTo(290, 18);
+  ctx.lineTo(230, 35);
+  ctx.lineTo(36, 35);
+  ctx.lineTo(36, 220);
+  ctx.lineTo(18, 255);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(1582, 840);
+  ctx.lineTo(1582, 1082);
+  ctx.lineTo(1300, 1082);
+  ctx.lineTo(1360, 1065);
+  ctx.lineTo(1564, 1065);
+  ctx.lineTo(1564, 890);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawQR() {
+  const x = 1330;
+  const y = 812;
+  const size = 155;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(x - 10, y - 10, size + 20, size + 20);
+
+  if (state.qr) {
+    ctx.drawImage(state.qr, x, y, size, size);
+  } else {
+    ctx.strokeStyle = "#222222";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x + 12, y + 12, size - 24, size - 24);
+    fitText("QR", x + size / 2, y + 88, 90, "bold 36px Arial", "#111111");
+  }
+
+  ctx.fillStyle = C.red;
+  ctx.fillRect(1304, 978, 207, 32);
+  fitText("SCAN TO VERIFY", 1407, 1000, 194, "bold 16px Arial", "#ffffff");
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const gradient = ctx.createLinearGradient(0, 0, 1600, 1100);
+  gradient.addColorStop(0, C.bg);
+  gradient.addColorStop(0.5, "#ffffff");
+  gradient.addColorStop(1, C.bg2);
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 1600, 1100);
+
+  // Light technical background texture
+  ctx.save();
+  ctx.globalAlpha = 0.4;
+
+  for (let i = -900; i < 2000; i += 48) {
+    line(i, 0, i + 1100, 1100, C.texture, 1);
+  }
+
+  ctx.restore();
+
+  drawCircuits();
+  drawFrame();
+  drawLogo();
+
+  // Certificate headings
+  fitText("CERTIFICATE", 800, 277, 1250, "900 88px Georgia", C.text);
+
+  line(235, 306, 495, 306, C.red, 4);
+  line(1105, 306, 1365, 306, C.red, 4);
+
+  fitText("OF ACHIEVEMENT", 800, 342, 820, "bold 35px Georgia", C.text);
+  fitText("This is to certify that", 800, 405, 700, "29px Georgia", C.secondary);
+
+  fitText(
+    $("recipient").value.trim() || "Recipient Name",
+    800, 496, 1230,
+    "italic 65px Georgia",
+    C.text
+  );
+
+  line(275, 523, 1325, 523, C.red, 3);
+
+  ctx.save();
+  ctx.translate(800, 523);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = C.red;
+  ctx.fillRect(-9, -9, 18, 18);
+  ctx.restore();
+
+  wrapText(
+    $("description").value,
+    800, 575, 1060, 34,
+    "25px Georgia", C.secondary
+  );
+
+  fitText(
+    $("course").value.trim() || "Course / Achievement",
+    800, 653, 1120,
+    "bold 38px Georgia",
+    C.text
+  );
+
+  fitText(
+    "Certificate ID: " + ($("certid").value.trim() || "—"),
+    800, 703, 600,
+    "17px Arial",
+    C.muted
+  );
+
+  // Issue date
+  line(175, 870, 500, 870, C.line, 2);
+  fitText(formatDate($("date").value), 338, 845, 380, "bold 25px Georgia", C.text);
+  fitText("DATE OF ISSUE", 338, 908, 300, "bold 15px Arial", C.muted);
+
+  // Signature illustration and issuer
+  line(635, 870, 970, 870, C.line, 2);
+
+  ctx.save();
+  ctx.strokeStyle = C.text;
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(695, 834);
+// Handwritten-style "Sameer" signature
+ctx.beginPath();
+ctx.moveTo(650, 830);
+
+  // S
+  ctx.bezierCurveTo(662, 805, 692, 797, 699, 813);
+  ctx.bezierCurveTo(705, 827, 667, 829, 668, 842);
+  ctx.bezierCurveTo(670, 856, 695, 850, 705, 837);
+
+  // a
+  ctx.bezierCurveTo(697, 827, 682, 836, 687, 846);
+  ctx.bezierCurveTo(692, 855, 708, 840, 709, 831);
+  ctx.bezierCurveTo(705, 850, 715, 854, 724, 839);
+
+  // m
+  ctx.bezierCurveTo(727, 830, 726, 821, 730, 831);
+  ctx.bezierCurveTo(733, 839, 731, 846, 738, 840);
+  ctx.bezierCurveTo(746, 824, 751, 825, 749, 838);
+  ctx.bezierCurveTo(748, 849, 757, 844, 764, 834);
+
+  // e
+  ctx.bezierCurveTo(754, 832, 754, 845, 766, 843);
+  ctx.bezierCurveTo(778, 840, 781, 830, 786, 827);
+
+  // e
+  ctx.bezierCurveTo(776, 831, 775, 843, 786, 842);
+  ctx.bezierCurveTo(798, 841, 802, 831, 807, 826);
+
+  // r
+  ctx.bezierCurveTo(804, 837, 803, 844, 810, 839);
+  ctx.bezierCurveTo(818, 831, 825, 830, 832, 835);
+
+  // Finishing flourish
+  ctx.bezierCurveTo(849, 848, 865, 843, 884, 824);
+
+  ctx.stroke();
+  ctx.restore();
+
+  fitText($("issuer").value.trim() || "Issuer Name", 800, 906, 360, "bold 23px Georgia", C.text);
+  fitText(($("role").value || "ISSUER").toUpperCase(), 800, 935, 420, "bold 14px Arial", C.muted);
+
+  // QR code and footer
+  drawQR();
+
+  ctx.fillStyle = C.bg;
+  ctx.fillRect(505, 1020, 590, 58);
+
+  line(505, 1020, 468, 1050, C.red, 3);
+  line(468, 1050, 505, 1080, C.red, 3);
+  line(1095, 1020, 1132, 1050, C.red, 3);
+  line(1132, 1050, 1095, 1080, C.red, 3);
+
+  fitText(
+    ($("tagline").value || "LEARN • PRACTICE • SECURE").toUpperCase(),
+    800, 1057, 550,
+    "bold 20px Arial",
+    C.text
+  );
+}
+
+function generateQR() {
+  const url = $("verifyUrl").value.trim();
+  const request = ++state.qrRequest;
+
+  state.qr = null;
+  state.qrUrl = url;
+  render();
+
+  if (!url) {
+    status("Enter a verification URL first.");
+    return;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      status("Please use an HTTP or HTTPS URL.");
+      return;
+    }
+  } catch {
+    status("Invalid URL. Include https:// or http://");
+    return;
+  }
+
+  if (!window.QRCode) {
+    status("QR library unavailable. Check your internet connection.");
+    return;
+  }
+
+  const holder = $("qrHolder");
+  holder.replaceChildren();
+
+  new QRCode(holder, {
+    text: url,
+    width: 300,
+    height: 300,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  setTimeout(() => {
+    if (request !== state.qrRequest) return;
+
+    const qrCanvas = holder.querySelector("canvas");
+
+    if (!qrCanvas) {
+      status("Could not create the QR code. Please try again.");
+      return;
+    }
+
+    const image = new Image();
+
+    image.onload = () => {
+      if (request !== state.qrRequest) return;
+
+      state.qr = image;
+      render();
+      status("QR code generated and embedded in the certificate.");
+    };
+
+    image.src = qrCanvas.toDataURL("image/png");
+  }, 150);
+}
+
+function exportPNG() {
+  render();
+
+  if (state.qrUrl && !state.qr) {
+    status("Generate the QR code before exporting.");
+    return;
+  }
+
+  canvas.toBlob(blob => {
+    if (!blob) {
+      status("Could not export the certificate.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download =
+      (($("certid").value.trim() || "certificate")
+        .replace(/[^a-z0-9_-]/gi, "_")) + ".png";
+
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    status("PNG certificate downloaded.");
+  }, "image/png");
+}
+
+function downloadJSON() {
+  const data = {
+    recipient: $("recipient").value,
+    course: $("course").value,
+    description: $("description").value,
+    issueDate: $("date").value,
+    certificateId: $("certid").value,
+    issuer: $("issuer").value,
+    issuerTitle: $("role").value,
+    tagline: $("tagline").value,
+    verificationURL: $("verifyUrl").value
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = (data.certificateId || "certificate") + ".json";
+  a.click();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  status("Certificate data downloaded.");
+}
+
+// Live updates
+[
+  "recipient", "course", "description", "date",
+  "certid", "issuer", "role", "tagline"
+].forEach(id => {
+  $(id).addEventListener("input", render);
+});
+
+$("makeQR").addEventListener("click", generateQR);
+$("downloadPNG").addEventListener("click", exportPNG);
+
+$("savePDF").addEventListener("click", () => {
+  if (state.qrUrl && !state.qr) {
+    status("Generate the QR code before printing.");
+    return;
+  }
+
+  render();
+  window.print();
+});
+
+$("updatePreview").addEventListener("click", () => {
+  render();
+  status("Preview updated.");
+});
+
+$("downloadData").addEventListener("click", downloadJSON);
+
+$("logoFile").addEventListener("change", event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    status("Please select a valid image file.");
+    event.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    const img = new Image();
+
+    img.onload = () => {
+      state.logo = img;
+      render();
+      status("Custom logo uploaded successfully.");
+    };
+
+    img.onerror = () => status("Could not load this image.");
+    img.src = e.target.result;
+  };
+
+  reader.readAsDataURL(file);
+});
+
+$("removeLogo").addEventListener("click", () => {
+  state.logo = null;
+  $("logoFile").value = "";
+  render();
+  status("Logo removed. No text logo is displayed.");
+});
+
+$("resetForm").addEventListener("click", () => {
+  if (!confirm("Reset all certificate fields?")) return;
+
+  Object.entries(defaults).forEach(([id, value]) => {
+    $(id).value = value;
+  });
+
+  const now = new Date();
+
+  $("date").value =
+    now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0");
+
+  $("verifyUrl").value = "";
+  $("logoFile").value = "";
+
+  state.logo = null;
+  state.qr = null;
+  state.qrUrl = "";
+  state.qrRequest++;
+
+  render();
+  status("Certificate fields reset.");
+});
+
+// Initialize with the current date
+const today = new Date();
+
+$("date").value =
+  today.getFullYear() + "-" +
+  String(today.getMonth() + 1).padStart(2, "0") + "-" +
+  String(today.getDate()).padStart(2, "0");
+
+render();
+</script>
+
+</body>
+</html>
