@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Three-Copy Challan Generator</title>
+<style>
+:root{
+  --brand:#173b70;--brand-2:#24569a;--ink:#17243a;--muted:#68778d;
+  --line:#e1e7ef;--soft:#f4f7fb;--white:#fff;--green:#16794b;
+  --shadow:0 14px 40px rgba(20,42,74,.08);--radius:16px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:34px 22px 60px;
+  background:linear-gradient(180deg,#f5f8fc 0%,#edf2f8 100%);
+  color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+.app{max-width:1240px;margin:0 auto}
+.header{
+  display:flex;justify-content:space-between;align-items:center;gap:24px;
+  margin:0 auto 26px;padding:4px 2px;
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
+  color:#fff;background:linear-gradient(145deg,#24569a,#122f5a);
+  box-shadow:0 8px 18px rgba(23,59,112,.22);font-size:22px;font-weight:800;
+}
+h1{font-size:clamp(22px,2.4vw,30px);letter-spacing:-.8px;margin:0;font-weight:800}
+.sub{color:var(--muted);font-size:14px;margin:6px 0 0;line-height:1.5}
+.header-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border-radius:999px;
+  border:1px solid #dce5f0;background:#fff;color:#40536d;font-size:11px;font-weight:750;
+}
+.pill-dot{width:7px;height:7px;background:#18a66a;border-radius:50%}
+.layout{display:grid;grid-template-columns:minmax(330px,390px) minmax(0,1fr);gap:22px;align-items:start}
+.panel,.preview{
+  background:var(--white);border:1px solid rgba(216,225,237,.95);border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.panel{padding:24px}
+.section-heading{display:flex;align-items:center;gap:11px;margin:0 0 17px}
+.section-number{
+  width:29px;height:29px;display:grid;place-items:center;border-radius:9px;
+  color:#1c4d88;background:#eaf1fb;font-size:12px;font-weight:850;
+}
+.panel h2,.preview h2{font-size:16px;letter-spacing:-.2px;margin:0;font-weight:800}
+.section-caption{font-size:11px;color:#8390a3;margin:4px 0 0}
+.field{margin-bottom:15px}
+label{display:block;font-size:11px;font-weight:750;letter-spacing:.15px;margin-bottom:7px;color:#3d4d63}
+input{
+  width:100%;padding:12px 13px;border:1px solid #d7e0eb;border-radius:9px;
+  font:13px inherit;color:var(--ink);background:#fff;transition:border-color .15s,box-shadow .15s;
+}
+input::placeholder{color:#a3afbf}
+input:focus{outline:0;border-color:#5481bb;box-shadow:0 0 0 3px rgba(49,102,169,.11)}
+.divider{height:1px;background:#edf1f6;margin:22px 0}
+button{
+  border:0;border-radius:9px;padding:12px 15px;font-weight:750;font-size:12px;
+  letter-spacing:.1px;cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s;
+}
+button:hover:not(:disabled){transform:translateY(-1px)}
+button:active:not(:disabled){transform:translateY(0)}
+.primary{
+  background:linear-gradient(135deg,#1d4b84,#153765);color:#fff;
+  box-shadow:0 5px 12px rgba(23,59,112,.16);
+}
+.primary:hover:not(:disabled){box-shadow:0 8px 18px rgba(23,59,112,.23)}
+.secondary{background:#edf3fa;color:#214c7e;border:1px solid #e0e9f4}
+button:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
+.actions button{flex:1}
+.template-action button{width:100%}
+.upload{
+  border:1.5px dashed #b7c7dc;border-radius:12px;padding:19px 14px;text-align:center;
+  background:linear-gradient(180deg,#f9fbfe,#f4f8fd);transition:border-color .15s,background .15s;
+}
+.upload:hover{border-color:#5d83b4;background:#f0f6fd}
+.upload-icon{
+  width:38px;height:38px;border-radius:11px;background:#e6eef9;color:#24558e;
+  display:grid;place-items:center;margin:0 auto 9px;font-size:18px;font-weight:800;
+}
+.upload-title{font-size:12px;font-weight:800;color:#2b3e57}
+.upload-caption{font-size:10px;color:#8390a3;margin-top:4px}
+.upload input{border:0;padding:11px 0 0;font-size:11px;max-width:100%;background:transparent}
+.status{
+  border:1px solid #e2eaf3;border-radius:10px;background:#f7f9fc;padding:12px 13px;
+  font-size:11px;color:#52637a;margin-top:14px;line-height:1.55;white-space:pre-line;
+}
+.hint{font-size:10px;color:#8190a4;line-height:1.6;margin:12px 0 0}
+.hint b{color:#52637a}
+.preview{padding:25px;min-height:490px}
+.preview-top{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:20px}
+.preview-intro p{font-size:12px;color:var(--muted);line-height:1.65;margin:7px 0 0;max-width:560px}
+.page-tag{
+  flex:none;padding:8px 11px;border-radius:8px;background:#f0f5fb;border:1px solid #e0e9f4;
+  color:#31577f;font-size:10px;font-weight:800;white-space:nowrap;
+}
+.workflow{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:22px 0 20px}
+.step{
+  padding:15px;border:1px solid #e6ebf2;border-radius:12px;background:#fbfcfe;min-height:115px;
+}
+.step-icon{
+  width:29px;height:29px;border-radius:9px;background:#edf3fb;color:#28588e;
+  display:grid;place-items:center;font-size:11px;font-weight:850;margin-bottom:11px;
+}
+.step b{display:block;font-size:11px;margin-bottom:5px;color:#2d3e54}
+.step span{display:block;font-size:10px;color:#7b899d;line-height:1.5}
+.fileSummary{
+  padding:13px 15px;border-radius:10px;background:#f1f8f4;border:1px solid #d9eee1;
+  color:#24704b;font-size:12px;font-weight:700;margin:16px 0 0;
+}
+.table-wrap{overflow:auto;margin-top:15px;border:1px solid #e6ebf2;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:520px}
+th,td{padding:11px 12px;border-bottom:1px solid #edf1f5;text-align:left}
+th{background:#f7f9fc;color:#69788d;font-size:10px;text-transform:uppercase;letter-spacing:.45px}
+td{color:#43536a}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fafcff}
+.footer-note{
+  display:flex;align-items:flex-start;gap:9px;padding-top:18px;margin-top:20px;
+  border-top:1px solid #edf1f6;color:#8290a3;font-size:10px;line-height:1.55;
+}
+.footer-note strong{color:#52647c}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}.header-meta{justify-content:flex-start}}
+@media(max-width:600px){
+  body{padding:18px 11px 36px}.panel,.preview{padding:18px}
+  .workflow{grid-template-columns:1fr}.step{min-height:0}
+  .preview-top{flex-direction:column}.page-tag{white-space:normal}
+}
+</style>
+<!-- SheetJS reads/writes Excel workbooks; jsPDF creates the combined PDF. -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div><h1>Challan Studio</h1><p class="sub">Bulk fee challan generation · Excel to PDF</p></div>
+    </div>
+    <div class="header-meta">
+      <span class="pill"><span class="pill-dot"></span> Ready to generate</span>
+      <span class="pill">A4 Landscape</span>
+      <span class="pill">3 Copies / Student</span>
+    </div>
+  </header>
+  <main class="layout">
+    <section class="panel">
+      <div class="section-heading"><span class="section-number">01</span><div><h2>Institute details</h2><div class="section-caption">Customize the heading printed on each challan</div></div></div>
+      <div class="field"><label for="title">Institute / Custom Challan Title</label><input id="title" value="INSTITUTE NAME"></div>
+      <div class="field"><label for="subtitle">Subtitle / Contact (optional)</label><input id="subtitle" placeholder="Address, phone number or tagline"></div>
+      <div class="field"><label for="currency">Currency label</label><input id="currency" value="Rs."></div>
+      <div class="field"><label for="defaultDue">Default fee due date (used if Excel cell is blank)</label><input id="defaultDue" type="date"></div>
+      <div class="field"><label for="defaultIssue">Default issue date</label><input id="defaultIssue" type="date"></div>
+
+      <div class="divider"></div><div class="section-heading"><span class="section-number">02</span><div><h2>Student Excel sheet</h2><div class="section-caption">Download the template or upload your completed file</div></div></div>
+      <div class="actions template-action" style="margin-top:0">
+        <button class="secondary" type="button" id="templateBtn">↓ &nbsp; Download Excel Template</button>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label for="excelFile">Upload completed Excel file (.xlsx, .xls or .csv)</label>
+        <div class="upload">
+          <div class="upload-icon">↑</div>
+          <div class="upload-title">Select an Excel or CSV file</div>
+          <div class="upload-caption">Supported formats: XLSX, XLS, CSV</div>
+          <input id="excelFile" type="file" accept=".xlsx,.xls,.csv">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" type="button" id="generateBtn" disabled>↗ &nbsp; Generate Combined PDF</button>
+        <button class="secondary" type="button" id="clearBtn">Clear</button>
+      </div>
+      <div class="status" id="status" aria-live="polite">Download the Excel template, add your student records, then upload the completed sheet.</div>
+      <p class="hint">Required Excel columns: <b>Student Name</b>, <b>Fee</b>, <b>Fee Due Date</b>. Optional columns: Challan Number, Roll No, Course, Issue Date, Note. The first worksheet is used.</p>
+    </section>
+
+    <section class="preview">
+      <div class="preview-top">
+        <div class="preview-intro">
+          <h2>Generate challans in bulk</h2>
+          <p>Turn your student fee register into a print-ready PDF. Each student receives one A4 landscape page, divided into Student, Admin and Owner copies.</p>
+        </div>
+        <span class="page-tag">ONE PDF · MULTIPLE STUDENTS</span>
+      </div>
+      <div class="workflow">
+        <div class="step"><div class="step-icon">01</div><b>Download template</b><span>Start with the formatted Excel file and its ready-made column headings.</span></div>
+        <div class="step"><div class="step-icon">02</div><b>Upload student data</b><span>Enter one student per row. Blank challan numbers are generated automatically.</span></div>
+        <div class="step"><div class="step-icon">03</div><b>Export PDF</b><span>Download one combined PDF with three copies for every student.</span></div>
+      </div>
+      <div id="fileSummary" class="fileSummary" hidden></div>
+      <div class="table-wrap" id="tableWrap" hidden>
+        <table><thead><tr><th>#</th><th>Student</th><th>Fee</th><th>Due date</th><th>Challan no.</th></tr></thead><tbody id="rowsPreview"></tbody></table>
+      </div>
+      <div class="footer-note"><span>ⓘ</span><span><strong>Excel columns:</strong> Student Name, Fee and Fee Due Date are required. Challan Number, Roll No, Course, Issue Date and Note are optional. Only the first worksheet is processed.</span></div>
+    </section>
+  </main>
+</div>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  let students = [];
+  const todayISO = () => {
+    const d = new Date();
+    return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  };
+  $('defaultIssue').value = todayISO();
+
+  function dateToISO(value){
+    if(value === null || value === undefined || value === '') return '';
+    if(value instanceof Date && !isNaN(value)) return [value.getFullYear(),String(value.getMonth()+1).padStart(2,'0'),String(value.getDate()).padStart(2,'0')].join('-');
+    if(typeof value === 'number' && window.XLSX){
+      const parsed = XLSX.SSF.parse_date_code(value);
+      if(parsed) return [parsed.y,String(parsed.m).padStart(2,'0'),String(parsed.d).padStart(2,'0')].join('-');
+    }
+    const s = String(value).trim();
+    if(!s) return '';
+    let m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+    m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/);
+    if(m){
+      let year = Number(m[3]); if(year < 100) year += 2000;
+      // For slash dates in the template, interpret as day/month/year.
+      return `${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    }
+    const d = new Date(s);
+    if(!isNaN(d)) return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+    return '';
+  }
+  function displayDate(iso){
+    if(!iso) return '—';
+    const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`;
+  }
+  function challanFromDate(iso){
+    if(!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return String(Number(m)) + String(Number(d)) + y.slice(-2);
+  }
+  function normalizeHeader(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+  function pick(row, aliases){
+    const keys = Object.keys(row);
+    for(const alias of aliases){
+      const key = keys.find(k => normalizeHeader(k) === normalizeHeader(alias));
+      if(key !== undefined && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') return row[key];
+    }
+    return '';
+  }
+  function money(value){
+    const n = Number(value);
+    return Number.isFinite(n) ? n.toLocaleString('en-PK',{maximumFractionDigits:2}) : String(value||'0');
+  }
+  function parseRows(rawRows){
+    const defaultIssue = $('defaultIssue').value || todayISO();
+    const defaultDue = $('defaultDue').value || '';
+    const result = [];
+    rawRows.forEach((r,idx)=>{
+      const name = String(pick(r,['Student Name','Student','Name'])||'').trim();
+      const feeRaw = pick(r,['Fee','Fee Amount','Amount']);
+      if(!name && (feeRaw === '' || feeRaw === null)) return;
+      const fee = Number(feeRaw);
+      if(!name) throw new Error(`Row ${idx+2}: Student Name is missing.`);
+      if(feeRaw === '' || !Number.isFinite(fee) || fee < 0) throw new Error(`Row ${idx+2}: Fee must be a valid number (zero or higher).`);
+      const issue = dateToISO(pick(r,['Issue Date','Date'])) || defaultIssue;
+      const due = dateToISO(pick(r,['Fee Due Date','Due Date','Due'])) || defaultDue;
+      if(!due) throw new Error(`Row ${idx+2}: Fee Due Date is missing. Fill it in Excel or set a default due date.`);
+      const suppliedNo = String(pick(r,['Challan Number','Challan No','Challan'])||'').trim();
+      result.push({
+        student:name, fee, due, issue,
+        challan:suppliedNo || challanFromDate(issue),
+        roll:String(pick(r,['Roll No','Roll Number','Registration No','Reg No'])||'').trim(),
+        course:String(pick(r,['Course','Class','Program'])||'').trim(),
+        note:String(pick(r,['Note','Remarks','Description'])||'').trim()
+      });
+    });
+    if(!result.length) throw new Error('No student rows found. Add at least one student with a name and fee.');
+    return result;
+  }
+  function showPreview(){
+    $('rowsPreview').innerHTML = students.slice(0,12).map((s,i)=>
+      `<tr><td>${i+1}</td><td>${escapeHTML(s.student)}</td><td>${escapeHTML(money(s.fee))}</td><td>${displayDate(s.due)}</td><td>${escapeHTML(s.challan)}</td></tr>`
+    ).join('');
+    $('tableWrap').hidden = false;
+    $('fileSummary').textContent = `${students.length} valid challan(s) loaded.${students.length>12?' Showing first 12 rows in preview.':''}`; $('fileSummary').hidden = false;
+    $('generateBtn').disabled = false;
+  }
+  function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+  $('templateBtn').addEventListener('click',()=>{
+    if(!window.XLSX){$('status').textContent='Excel library did not load. Check your internet connection and refresh the page.';return;}
+    const data = [
+      ['Student Name','Fee','Fee Due Date','Challan Number','Roll No','Course','Issue Date','Note'],
+      ['Ali Ahmed',5000,'2026-11-15','','ST-001','CIT','2026-11-04','Please pay before the due date.'],
+      ['Sara Khan',6500,'2026-11-15','','ST-002','Cybersecurity','2026-11-04','']
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{wch:24},{wch:12},{wch:16},{wch:18},{wch:14},{wch:18},{wch:16},{wch:34}];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Challans');
+    XLSX.writeFile(wb,'challan_template.xlsx');
+    $('status').textContent='Excel template downloaded. Fill one student per row, then upload it.';
+  });
+
+  $('excelFile').addEventListener('change',async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    $('status').textContent='Reading Excel file…'; $('generateBtn').disabled=true;
+    try{
+      if(!window.XLSX) throw new Error('Excel library did not load. Check your internet connection and refresh the page.');
+      const buffer=await file.arrayBuffer();
+      const wb=XLSX.read(buffer,{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+      students=parseRows(raw);
+      showPreview();
+      $('status').textContent=`Loaded ${students.length} challan record(s) from ${file.name}.`;
+    }catch(err){
+      students=[];$('generateBtn').disabled=true;$('tableWrap').hidden=true;
+      $('fileSummary').textContent='';$('fileSummary').hidden=true;$('status').textContent='Could not load file: '+err.message;
+    }
+  });
+
+  function pdfText(doc,text,x,y,w,fontSize=8,align='left'){
+    doc.setFont('helvetica','normal');doc.setFontSize(fontSize);
+    const lines=doc.splitTextToSize(String(text||''),w);
+    doc.text(lines,x,y,{align});
+    return y+lines.length*(fontSize*0.42);
+  }
+  function drawCopy(doc,x,y,w,h,copyType,s){
+    const pad=5.5, cx=x+w/2;
+    doc.setDrawColor(35,49,69);doc.setLineWidth(.25);
+    // Border and copy label
+    doc.roundedRect(x+3,y+3,w-6,h-6,1.5,1.5,'S');
+    doc.setFont('helvetica','bold');doc.setFontSize(8);
+    doc.roundedRect(cx-19,y+8,38,6,2,2,'S');
+    doc.text(copyType.toUpperCase(),cx,y+12.1,{align:'center'});
+    let yy=y+23;
+    doc.setFont('helvetica','bold');doc.setFontSize(13);
+    const title=String($('title').value||'INSTITUTE NAME');
+    const titleLines=doc.splitTextToSize(title,w-2*pad);
+    doc.text(titleLines,cx,yy,{align:'center'});yy+=titleLines.length*5.3;
+    const subtitle=String($('subtitle').value||'').trim();
+    if(subtitle){doc.setFont('helvetica','normal');doc.setFontSize(7);const lines=doc.splitTextToSize(subtitle,w-2*pad);doc.text(lines,cx,yy+1,{align:'center'});yy+=lines.length*3.2+2;}
+    doc.setLineWidth(.35);doc.line(x+pad,yy+2,x+w-pad,yy+2);yy+=9;
+    const small=7;
+    doc.setFont('helvetica','normal');doc.setFontSize(small);
+    doc.text(`Challan: ${s.challan||'—'}`,x+pad,yy);
+    doc.text(`Issue: ${displayDate(s.issue)}`,x+w-pad,yy,{align:'right'});yy+=9;
+    const row=(label,value)=>{doc.setFont('helvetica','bold');doc.setFontSize(8);doc.text(label,x+pad,yy);doc.setFont('helvetica','normal');doc.text(doc.splitTextToSize(String(value||'—'),w-pad*2-22),x+pad+22,yy);yy+=7;};
+    row('Student:',s.student);row('Roll No:',s.roll);row('Course:',s.course);
+    const boxY=yy+3, boxH=32;
+    doc.setLineWidth(.45);doc.rect(x+pad,boxY,w-pad*2,boxH);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.text('FEE PAYABLE',cx,boxY+9,{align:'center'});
+    doc.setFont('helvetica','bold');doc.setFontSize(19);
+    doc.text(`${$('currency').value||'Rs.'} ${money(s.fee)}`,cx,boxY+23,{align:'center',maxWidth:w-2*pad-4});
+    yy=boxY+boxH+10;
+    doc.setFont('helvetica','bold');doc.setFontSize(8);
+    doc.text(`Due Date: ${displayDate(s.due)}`,cx,yy,{align:'center'});yy+=8;
+    if(s.note){doc.setFont('helvetica','normal');doc.setFontSize(6.5);const lines=doc.splitTextToSize(s.note,w-2*pad);doc.text(lines,x+pad,yy);yy+=lines.length*3.2+3;}
+    const signY=y+h-19;
+    doc.setLineWidth(.25);doc.line(x+pad,signY,x+pad+35,signY);doc.line(x+w-pad-35,signY,x+w-pad,signY);
+    doc.setFont('helvetica','normal');doc.setFontSize(6);
+    const left=copyType==='Student'?'Cashier Signature':copyType==='Admin'?'Received By':'Cashier Signature';
+    const right=copyType==='Student'?'Student Signature':copyType==='Admin'?'Authorized Signature':'Owner Signature';
+    doc.text(left,x+pad+17.5,signY+4,{align:'center'});doc.text(right,x+w-pad-17.5,signY+4,{align:'center'});
+    doc.setFontSize(5.8);doc.setTextColor(100,116,139);
+    const foot=copyType==='Student'?'Please keep this copy for your record.':copyType==='Admin'?'For office / administration record.':'For owner / accounts record.';
+    doc.text(foot,cx,y+h-7,{align:'center'});doc.setTextColor(0,0,0);
+  }
+  function generatePDF(){
+    if(!students.length)return;
+    if(!window.jspdf||!window.jspdf.jsPDF){$('status').textContent='PDF library did not load. Check your internet connection and refresh the page.';return;}
+    try{
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+      const pageW=297,pageH=210,copyW=pageW/3;
+      students.forEach((s,i)=>{
+        if(i>0)doc.addPage('a4','landscape');
+        drawCopy(doc,0,0,copyW,pageH,'Student',s);
+        drawCopy(doc,copyW,0,copyW,pageH,'Admin',s);
+        drawCopy(doc,copyW*2,0,copyW,pageH,'Owner',s);
+        // Dashed cut guides between the three equal copies.
+        doc.setDrawColor(130,140,155);doc.setLineDashPattern([1.5,1.5],0);doc.setLineWidth(.2);
+        doc.line(copyW,2,copyW,pageH-2);doc.line(copyW*2,2,copyW*2,pageH-2);
+        doc.setLineDashPattern([],0);
+      });
+      const safe=(String($('title').value||'challans').trim().replace(/[^a-z0-9-_]+/gi,'_').replace(/^_+|_+$/g,''))||'challans';
+      doc.save(`${safe}_bulk_challans.pdf`);
+      $('status').textContent=`Success! Generated one PDF containing ${students.length} A4 landscape page(s), with 3 copies per page.`;
+    }catch(err){$('status').textContent='PDF generation failed: '+err.message;}
+  }
+  $('generateBtn').addEventListener('click',generatePDF);
+  $('clearBtn').addEventListener('click',()=>{
+    students=[];$('excelFile').value='';$('generateBtn').disabled=true;$('tableWrap').hidden=true;
+    $('rowsPreview').innerHTML='';$('fileSummary').textContent='';
+    $('status').textContent='Cleared. Download the template or upload another Excel file.';
+  });
+})();
+</script>
+</body>
+</html>
