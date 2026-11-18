@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PaperScan — Smart Document Scanner</title>
+<style>
+:root{--bg:#f3f5f9;--panel:#fff;--ink:#172033;--muted:#687386;--line:#e4e8ef;--blue:#315efb;--blue2:#2148d8;--shadow:0 14px 40px rgba(22,34,60,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100% - 1180px)/2))}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px}.logo{width:35px;height:35px;border-radius:11px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:20px}.status{font-size:12px;color:var(--muted)}.dot{display:inline-block;width:7px;height:7px;background:#18ad75;border-radius:50%;margin-right:6px}
+main{max-width:1180px;margin:28px auto;padding:0 20px}.intro{margin-bottom:20px}.intro h1{font-size:27px;letter-spacing:-.8px;margin:0 0 5px}.intro p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.8fr);gap:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:16px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panel-head strong{font-size:14px}.panel-head span{font-size:12px;color:var(--muted)}
+.stage{padding:18px;min-height:510px;display:flex;align-items:center;justify-content:center;background:#f8f9fc}.empty{width:100%;min-height:440px;border:2px dashed #cbd3e1;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px;color:var(--muted)}.upload-icon{width:58px;height:58px;border-radius:18px;background:#eaf0ff;color:var(--blue);display:grid;place-items:center;font-size:27px;margin-bottom:15px}.empty h3{margin:0 0 5px;color:var(--ink);font-size:17px}.empty p{margin:0 0 18px;font-size:13px}
+.preview-wrap{width:100%;display:none;text-align:center}.canvas-shell{position:relative;display:inline-block;max-width:100%;line-height:0;touch-action:none}.canvas-shell>canvas:first-child{max-width:100%;max-height:650px;object-fit:contain;border-radius:7px;box-shadow:0 8px 28px #15213a20;background:#fff}.crop-overlay{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none;cursor:crosshair}.crop-overlay.active{display:block}
+.controls{padding:18px}.section{margin-bottom:20px}.section:last-child{margin:0}.section-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.75px;color:#788397;margin-bottom:10px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 12px;border-radius:10px;font-weight:650;font-size:12px;cursor:pointer}.btn:hover{border-color:#aebcfb;background:#f8faff}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{background:var(--blue2)}.btn:disabled{opacity:.42;cursor:not-allowed}.btn.full{width:100%}.btn-row{display:flex;gap:7px;flex-wrap:wrap}input[type=file]{display:none}
+.mode-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.mode{padding:9px 7px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;text-align:center;font-size:12px;font-weight:700;color:#566176}.mode.active{border-color:var(--blue);background:#eef2ff;color:var(--blue)}.sample{height:23px;margin:0 auto 5px;width:40px;border-radius:4px;background:linear-gradient(135deg,#dce8f5,#e8d3b8,#fff);border:1px solid #d7dce5}.mode[data-mode=grayscale] .sample{filter:grayscale(1)}.mode[data-mode=blackwhite] .sample{background:linear-gradient(90deg,#222 50%,#fff 50%)}.mode[data-mode=original] .sample{background:linear-gradient(135deg,#dce8f5,#e8d3b8,#fff)}
+.range-row{display:flex;justify-content:space-between;font-size:12px;color:#5f6b7e;margin:8px 0 4px}input[type=range]{width:100%;accent-color:var(--blue)}.note{font-size:11px;color:#8993a4;margin-top:7px}.divider{height:1px;background:var(--line);margin:16px 0}#message{font-size:12px;color:var(--muted);min-height:18px;margin-top:9px}.crop-tip{font-size:11px;color:#687386;margin:9px 0 0;line-height:1.45}.spinner{display:inline-block;width:12px;height:12px;border:2px solid #dce3f7;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}footer{text-align:center;color:#929bad;font-size:11px;margin:22px 0 28px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.stage{min-height:320px}.empty{min-height:290px}header{padding:0 18px}.intro h1{font-size:23px}}
+</style></head>
+<body>
+<header><div class="brand"><div class="logo">▤</div>PaperScan</div><div class="status"><span class="dot"></span>Private · processed in your browser</div></header>
+<main><div class="intro"><h1>Smart Document Scanner</h1><p>Crop page corners, correct tilt, clean the paper and export a polished A4 document.</p></div>
+<div class="layout">
+<section class="panel"><div class="panel-head"><strong>Scan preview</strong><span id="fileLabel">No image selected</span></div><div class="stage">
+<div class="empty" id="empty"><div class="upload-icon">↥</div><h3>Upload a document photo</h3><p>Choose a JPG, PNG or WEBP image.</p><label class="btn primary" for="fileInput">Choose image</label><div class="note">Place the full page inside the photo for best results.</div></div>
+<div class="preview-wrap" id="previewWrap"><div class="canvas-shell" id="canvasShell"><canvas id="canvas"></canvas><canvas id="cropOverlay" class="crop-overlay"></canvas></div></div>
+</div></section>
+<aside class="panel"><div class="panel-head"><strong>Scan settings</strong><span>Adjust output</span></div><div class="controls">
+<div class="section"><div class="section-title">1 · Image & crop</div><div class="btn-row"><label class="btn primary" for="fileInput">Upload</label><button class="btn" id="cropBtn" disabled>⌗ Crop page</button><button class="btn" id="applyCropBtn" disabled>Apply crop</button><button class="btn" id="cancelCropBtn" disabled>Cancel</button></div><p class="crop-tip">Select Crop page, then drag the four corner handles to the page edges. For perspective correction, drag the four corners carefully to the page edges.</p><div style="height:8px"></div><div class="btn-row"><button class="btn" id="rotateBtn" disabled>↻ Rotate</button><button class="btn" id="resetBtn" disabled>Reset</button></div></div>
+<div class="section"><div class="section-title">2 · Scanner filter</div><div class="mode-grid"><button class="mode active" data-mode="color"><div class="sample"></div>Color</button><button class="mode" data-mode="grayscale"><div class="sample"></div>Grayscale</button><button class="mode" data-mode="blackwhite"><div class="sample"></div>Document B&W</button><button class="mode" data-mode="original"><div class="sample"></div>Original</button></div></div>
+<div class="section"><div class="section-title">3 · Straighten & content scale</div>
+<div class="range-row"><label for="tilt">Tilt correction</label><span id="tiltVal">0°</span></div>
+<input id="tilt" type="range" min="-15" max="15" step="0.5" value="0" disabled>
+<div class="range-row"><label for="contentScale">Content scale on page</label><span id="contentScaleVal">100%</span></div>
+<input id="contentScale" type="range" min="70" max="115" step="1" value="100" disabled>
+<div class="note">Use tilt to deskew a slanted page. Content scale adjusts the document size on the A4 sheet.</div>
+</div>
+<div class="section"><div class="section-title">4 · Text enhancement</div><div class="range-row"><label for="brightness">Brightness</label><span id="brightnessVal">100%</span></div><input id="brightness" type="range" min="50" max="160" value="100" disabled><div class="range-row"><label for="contrast">Contrast</label><span id="contrastVal">100%</span></div><input id="contrast" type="range" min="50" max="200" value="115" disabled><div class="note">Document B&W removes color and boosts text/background separation.</div></div>
+<div class="divider"></div><div class="section"><div class="section-title">5 · Export</div><button class="btn primary full" id="pdfBtn" disabled>↓ &nbsp; Save as A4 PDF</button><div style="height:8px"></div><button class="btn full" id="jpgBtn" disabled>Save scanned image</button><div id="message">Upload an image to begin.</div></div>
+</div></aside></div><footer>PaperScan · Local image processing · A4 PDF export</footer></main>
+<input type="file" id="fileInput" accept="image/*">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+<script>
+const $=id=>document.getElementById(id), canvas=$('canvas'),ctx=canvas.getContext('2d'),overlay=$('cropOverlay'),octx=overlay.getContext('2d');
+let source=null,baseCanvas=null,filename='scan',rotation=0,tilt=0,contentScale=100,mode='color',brightness=100,contrast=115,cropMode=false,corners=[],dragIndex=-1;
+const actionIds=['cropBtn','applyCropBtn','cancelCropBtn','rotateBtn','resetBtn','pdfBtn','jpgBtn'];
+function enable(on){actionIds.forEach(id=>$(id).disabled=!on);$('brightness').disabled=!on;$('contrast').disabled=!on;$('tilt').disabled=!on;$('contentScale').disabled=!on}
+function msg(t,spin=false){$('message').innerHTML=(spin?'<span class="spinner"></span>':'')+t}
+function loadImage(file){if(!file||!file.type.startsWith('image/'))return msg('Please choose an image file.');let url=URL.createObjectURL(file),im=new Image();im.onload=()=>{source=im;filename=(file.name||'scan').replace(/\.[^.]+$/,'');rotation=0;tilt=0;contentScale=100;cropMode=false;mode='color';brightness=100;contrast=115;$('brightness').value=100;$('contrast').value=115;$('tilt').value=0;$('contentScale').value=100;$('tiltVal').textContent='0°';$('contentScaleVal').textContent='100%';$('brightnessVal').textContent='100%';$('contrastVal').textContent='115%';document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b.dataset.mode==='color'));$('empty').style.display='none';$('previewWrap').style.display='block';$('fileLabel').textContent=file.name||'Image loaded';render();enable(true);msg('Image ready. Crop the page, straighten it and enhance the text.');URL.revokeObjectURL(url)};im.onerror=()=>msg('Unable to open this image.');im.src=url}
+$('fileInput').onchange=e=>loadImage(e.target.files[0]);
+function render(){
+ if(!source)return;
+ const sw=source.width,sh=source.height,angle=(rotation+tilt)*Math.PI/180,sc=1;
+ const cos=Math.abs(Math.cos(angle)),sin=Math.abs(Math.sin(angle));
+ const w=Math.ceil((sw*cos+sh*sin)*sc),h=Math.ceil((sw*sin+sh*cos)*sc);
+ const scale=Math.min(1,2400/Math.max(w,h));
+ const out=document.createElement('canvas');out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const c=out.getContext('2d',{willReadFrequently:true});
+ c.fillStyle='#fff';c.fillRect(0,0,out.width,out.height);
+ c.translate(out.width/2,out.height/2);c.rotate(angle);c.scale(sc*scale,sc*scale);
+ c.filter=`brightness(${brightness}%) contrast(${contrast}%)`;
+ c.drawImage(source,-sw/2,-sh/2);c.filter='none';
+ if(mode==='grayscale'||mode==='blackwhite'){
+  const im=c.getImageData(0,0,out.width,out.height),d=im.data;
+  if(mode==='grayscale'){
+   for(let i=0;i<d.length;i+=4){const y=.299*d[i]+.587*d[i+1]+.114*d[i+2];d[i]=d[i+1]=d[i+2]=y}
+  }else{
+   // Local adaptive threshold: helps retain text while whitening uneven paper backgrounds.
+   const W=out.width,H=out.height,gray=new Uint8Array(W*H),integral=new Float64Array((W+1)*(H+1));
+   for(let y=0;y<H;y++){let row=0;for(let x=0;x<W;x++){let i=(y*W+x)*4;gray[y*W+x]=.299*d[i]+.587*d[i+1]+.114*d[i+2];row+=gray[y*W+x];integral[(y+1)*(W+1)+x+1]=integral[y*(W+1)+x+1]+row}}
+   const radius=Math.max(9,Math.round(Math.min(W,H)*.018)),stride=W+1;
+   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const x1=Math.max(0,x-radius),y1=Math.max(0,y-radius),x2=Math.min(W-1,x+radius),y2=Math.min(H-1,y+radius);
+    const sum=integral[(y2+1)*stride+x2+1]-integral[y1*stride+x2+1]-integral[(y2+1)*stride+x1]+integral[y1*stride+x1];
+    const avg=sum/((x2-x1+1)*(y2-y1+1)),v=gray[y*W+x]>avg-12?255:0,i=(y*W+x)*4;
+    d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;
+   }
+  }
+  c.putImageData(im,0,0);
+ }
+ baseCanvas=out;canvas.width=out.width;canvas.height=out.height;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(out,0,0);
+ overlay.width=canvas.width;overlay.height=canvas.height;
+ overlay.style.width=canvas.clientWidth+'px';overlay.style.height=canvas.clientHeight+'px';
+ if(cropMode)drawCrop();
+}
+function resetCorners(){corners=[{x:canvas.width*.06,y:canvas.height*.06},{x:canvas.width*.94,y:canvas.height*.06},{x:canvas.width*.94,y:canvas.height*.94},{x:canvas.width*.06,y:canvas.height*.94}]}
+function cropStart(){if(!source)return;cropMode=true;resetCorners();overlay.classList.add('active');$('applyCropBtn').disabled=false;$('cancelCropBtn').disabled=false;drawCrop();msg('Drag each blue corner onto the document corners.')}
+function drawCrop(){octx.clearRect(0,0,overlay.width,overlay.height);if(!cropMode)return;octx.fillStyle='rgba(10,20,40,.34)';octx.fillRect(0,0,overlay.width,overlay.height);octx.save();octx.beginPath();corners.forEach((p,i)=>i?octx.lineTo(p.x,p.y):octx.moveTo(p.x,p.y));octx.closePath();octx.globalCompositeOperation='destination-out';octx.fill();octx.restore();octx.beginPath();corners.forEach((p,i)=>i?octx.lineTo(p.x,p.y):octx.moveTo(p.x,p.y));octx.closePath();octx.strokeStyle='#fff';octx.lineWidth=Math.max(3,canvas.width/500);octx.setLineDash([12,7]);octx.stroke();octx.setLineDash([]);corners.forEach(p=>{octx.beginPath();octx.arc(p.x,p.y,Math.max(10,canvas.width/90),0,Math.PI*2);octx.fillStyle='#315efb';octx.fill();octx.lineWidth=3;octx.strokeStyle='#fff';octx.stroke()})}
+function pos(e){let r=overlay.getBoundingClientRect();return{x:(e.clientX-r.left)*overlay.width/r.width,y:(e.clientY-r.top)*overlay.height/r.height}}
+overlay.addEventListener('pointerdown',e=>{if(!cropMode)return;let p=pos(e),radius=Math.max(24,canvas.width/35);dragIndex=corners.reduce((best,q,i)=>Math.hypot(q.x-p.x,q.y-p.y)<(best.d??radius)?{i,d:Math.hypot(q.x-p.x,q.y-p.y)}:best,{}).i;if(dragIndex!==undefined)overlay.setPointerCapture(e.pointerId)});
+overlay.addEventListener('pointermove',e=>{if(dragIndex<0)return;let p=pos(e);corners[dragIndex]={x:Math.max(0,Math.min(canvas.width,p.x)),y:Math.max(0,Math.min(canvas.height,p.y))};drawCrop()});
+overlay.addEventListener('pointerup',()=>dragIndex=-1);overlay.addEventListener('pointercancel',()=>dragIndex=-1);
+$('cropBtn').onclick=cropStart;$('cancelCropBtn').onclick=()=>{cropMode=false;overlay.classList.remove('active');$('applyCropBtn').disabled=true;$('cancelCropBtn').disabled=true;octx.clearRect(0,0,overlay.width,overlay.height);msg('Crop cancelled.')};
+function orderPts(p){let s=p.map(q=>q.x+q.y),d=p.map(q=>q.x-q.y);return[p[s.indexOf(Math.min(...s))],p[d.indexOf(Math.max(...d))],p[s.indexOf(Math.max(...s))],p[d.indexOf(Math.min(...d))]]}
+function warpPerspective(input,pts){let p=orderPts(pts),[tl,tr,br,bl]=p;let width=Math.round(Math.max(Math.hypot(br.x-bl.x,br.y-bl.y),Math.hypot(tr.x-tl.x,tr.y-tl.y))),height=Math.round(Math.max(Math.hypot(tr.x-br.x,tr.y-br.y),Math.hypot(tl.x-bl.x,tl.y-bl.y)));width=Math.max(1,width);height=Math.max(1,height);
+if(window.cv&&cv.Mat){let src=cv.imread(input),dst=new cv.Mat(),srcTri=cv.matFromArray(4,1,cv.CV_32FC2,[tl.x,tl.y,tr.x,tr.y,br.x,br.y,bl.x,bl.y]),dstTri=cv.matFromArray(4,1,cv.CV_32FC2,[0,0,width-1,0,width-1,height-1,0,height-1]),M=cv.getPerspectiveTransform(srcTri,dstTri);cv.warpPerspective(src,dst,M,new cv.Size(width,height),cv.INTER_CUBIC,cv.BORDER_REPLICATE);let result=document.createElement('canvas');result.width=width;result.height=height;cv.imshow(result,dst);src.delete();dst.delete();srcTri.delete();dstTri.delete();M.delete();return result}
+let minX=Math.min(...p.map(q=>q.x)),maxX=Math.max(...p.map(q=>q.x)),minY=Math.min(...p.map(q=>q.y)),maxY=Math.max(...p.map(q=>q.y)),result=document.createElement('canvas');result.width=Math.max(1,maxX-minX);result.height=Math.max(1,maxY-minY);result.getContext('2d').drawImage(input,minX,minY,result.width,result.height,0,0,result.width,result.height);return result}
+$('applyCropBtn').onclick=()=>{if(!cropMode)return;try{let warped=warpPerspective(canvas,corners);let data=new Image();data.onload=()=>{source=data;rotation=0;tilt=0;contentScale=100;$('tilt').value=0;$('tiltVal').textContent='0°';$('contentScale').value=100;$('contentScaleVal').textContent='100%';cropMode=false;overlay.classList.remove('active');$('applyCropBtn').disabled=true;$('cancelCropBtn').disabled=true;render();msg('Page cropped and straightened. You can enhance and export it.');};data.src=warped.toDataURL('image/png')}catch(e){msg('Crop failed: '+e.message)}};
+$('rotateBtn').onclick=()=>{rotation=(rotation+90)%360;cropMode=false;overlay.classList.remove('active');render()};
+$('resetBtn').onclick=()=>{rotation=0;tilt=0;contentScale=100;mode='color';brightness=100;contrast=115;$('brightness').value=100;$('contrast').value=115;$('tilt').value=0;$('contentScale').value=100;$('tiltVal').textContent='0°';$('contentScaleVal').textContent='100%';$('brightnessVal').textContent='100%';$('contrastVal').textContent='115%';document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b.dataset.mode==='color'));cropMode=false;overlay.classList.remove('active');render();msg('Image settings reset.')};
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('active',x===b));render()});
+$('tilt').oninput=e=>{tilt=+e.target.value;$('tiltVal').textContent=tilt.toFixed(1).replace('.0','')+'°';cropMode=false;overlay.classList.remove('active');render()};
+$('contentScale').oninput=e=>{contentScale=+e.target.value;$('contentScaleVal').textContent=contentScale+'%';render()};
+$('brightness').oninput=e=>{brightness=+e.target.value;$('brightnessVal').textContent=brightness+'%';render()};$('contrast').oninput=e=>{contrast=+e.target.value;$('contrastVal').textContent=contrast+'%';render()};
+$('jpgBtn').onclick=()=>canvas.toBlob(blob=>download(blob,filename+'_scanned.jpg'),'image/jpeg',.96);
+function download(blob,name){let u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+$('pdfBtn').onclick=()=>{if(!window.jspdf)return msg('PDF engine unavailable. Check your internet connection.');try{let {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),pw=210,ph=297,margin=7,factor=contentScale/100,maxW=(pw-2*margin)/factor,maxH=(ph-2*margin)/factor,ratio=canvas.width/canvas.height,w=maxW,h=w/ratio;if(h>maxH){h=maxH;w=h*ratio}w*=factor;h*=factor;let data=canvas.toDataURL('image/jpeg',.97);pdf.setFillColor(255,255,255);pdf.rect(0,0,pw,ph,'F');pdf.addImage(data,'JPEG',(pw-w)/2,(ph-h)/2,w,h,undefined,'FAST');pdf.save(filename+'_scanned_A4.pdf');msg('A4 PDF saved successfully.')}catch(e){msg('PDF export failed: '+e.message)}};
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));document.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])loadImage(e.dataTransfer.files[0])});
+setEnabled(false);
+</script></body></html>

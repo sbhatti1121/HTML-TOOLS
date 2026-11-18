@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print Layout Studio</title>
+<style>
+:root{--bg:#f4f6fb;--panel:#fff;--ink:#172033;--muted:#68738a;--line:#e3e8f1;--accent:#405cf5;--accent2:#eef1ff;--shadow:0 12px 35px rgba(25,38,70,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#405cf5,#8b5cf6);display:grid;place-items:center;color:white;font-weight:800;font-size:18px}.brand h1{font-size:17px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:10px;font-weight:650;cursor:pointer}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn:hover{filter:brightness(.97)}main{max-width:1500px;margin:24px auto;padding:0 22px;display:grid;grid-template-columns:340px minmax(0,1fr);gap:22px;align-items:start}
+.sidebar{display:flex;flex-direction:column;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}.panel h2{font-size:14px;margin:0 0 14px;display:flex;align-items:center;gap:8px}.step{width:22px;height:22px;border-radius:7px;background:var(--accent2);color:var(--accent);display:inline-grid;place-items:center;font-size:11px;font-weight:800}
+.field{margin:0 0 12px}.field:last-child{margin-bottom:0}label{display:block;font-size:12px;font-weight:700;color:#46516a;margin-bottom:6px}input,select{width:100%;padding:9px 10px;border:1px solid #dce2ed;border-radius:9px;background:#fff;color:var(--ink);font:inherit;outline:none}input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #405cf51a}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hint{font-size:11px;color:var(--muted);margin-top:5px}.unit{position:relative}.unit input{padding-right:36px}.unit span{position:absolute;right:11px;top:9px;color:#8992a4;font-size:12px}.upload{border:1.5px dashed #c9d2e2;border-radius:12px;padding:17px;text-align:center;background:#fafbff;cursor:pointer}.upload:hover{border-color:var(--accent);background:#f6f7ff}.upload strong{display:block;font-size:12px;margin:7px 0 2px}.upload small{color:var(--muted)}.upload input{display:none}.thumb{width:100%;max-height:120px;object-fit:contain;border-radius:8px;margin-top:10px;display:none}.switchrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:12px;color:#4b5670}.switchrow input{width:auto}
+.workspace{min-width:0}.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:2px 0 14px}.workspace-head h2{margin:0;font-size:16px}.meta{color:var(--muted);font-size:12px}.stage{background:#e9edf5;border:1px solid #dfe4ed;border-radius:18px;padding:26px;min-height:620px;display:flex;align-items:flex-start;justify-content:center;overflow:auto}.paper{background:#fff;box-shadow:0 8px 30px rgba(24,35,59,.18);position:relative;flex:none;overflow:hidden}.cards{position:absolute;inset:0;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:flex-start;gap:var(--gap);padding:var(--margin);overflow:hidden}.mini-card{width:var(--cw);height:var(--ch);border:1px dashed #aeb8c9;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;flex:none}.mini-card img{width:100%;height:100%;display:block}.mini-card .placeholder{font-size:10px;color:#a2aaba;text-align:center;padding:5px}.empty{max-width:430px;text-align:center;color:#778198;margin:auto}.empty .big{font-size:42px;margin-bottom:8px}.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:11px;color:var(--muted)}.stat b{color:var(--ink);font-size:13px;margin-right:4px}.warning{color:#a45b13;background:#fff8eb;border:1px solid #f3dfbd;border-radius:9px;padding:9px 10px;font-size:11px;margin-top:10px;display:none}
+@media(max-width:900px){main{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.workspace{grid-row:1}.stage{min-height:420px}}
+@media(max-width:600px){header{padding:13px 15px;align-items:flex-start}.brand p{display:none}main{padding:0 12px;margin:14px auto}.sidebar{display:flex}.stage{padding:12px;min-height:340px}.actions .btn{padding:8px 10px;font-size:12px}}
+@page{margin:0}
+@media print{body{background:#fff}header,.sidebar,.workspace-head,.stats,.screen-only{display:none!important}main{display:block;margin:0;padding:0;max-width:none}.workspace{margin:0}.stage{display:block;min-height:0;padding:0;border:0;background:#fff;overflow:visible}.paper{box-shadow:none;margin:0!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}.cards{overflow:hidden}.mini-card{border-color:transparent}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">PL</div><div><h1>Print Layout Studio</h1><p>Arrange repeated image cards on any page size</p></div></div>
+ <div class="actions"><button class="btn" id="resetBtn">Reset</button><button class="btn primary" id="printBtn">Export / Print PDF</button></div>
+</header>
+<main>
+ <aside class="sidebar">
+  <section class="panel">
+   <h2><span class="step">1</span> Page canvas</h2>
+   <div class="field"><label for="pagePreset">Page size</label><select id="pagePreset">
+    <option value="210,297">A4 — 8.27 × 11.69 in</option><option value="148,210">A5 — 5.83 × 8.27 in</option><option value="176,250">B5 — 6.93 × 9.84 in</option><option value="182,257">B5 JIS — 7.17 × 10.12 in</option><option value="216,279">Letter — 8.5 × 11 in</option><option value="216,356">Legal — 8.5 × 14 in</option><option value="216,330">Foolscap — 8.5 × 13 in</option><option value="custom">Custom size</option>
+   </select></div>
+   <div class="two"><div class="field unit"><label>Width</label><input id="pageW" type="number" min=".1" step=".01" value="8.27"><span>in</span></div><div class="field unit"><label>Height</label><input id="pageH" type="number" min=".1" step=".01" value="11.69"><span>in</span></div></div>
+   <div class="field"><label>Orientation</label><select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></div>
+   <div class="two"><div class="field unit"><label>Page margin</label><input id="margin" type="number" min="0" step=".01" value=".25"><span>in</span></div><div class="field unit"><label>Card gap</label><input id="gap" type="number" min="0" step=".01" value=".08"><span>in</span></div></div>
+  </section>
+  <section class="panel">
+   <h2><span class="step">2</span> Repeated card canvas</h2>
+   <div class="two"><div class="field unit"><label>Card width</label><input id="cardW" type="number" min=".1" step=".01" value="2.5"><span>in</span></div><div class="field unit"><label>Card height</label><input id="cardH" type="number" min=".1" step=".01" value="3.5"><span>in</span></div></div>
+   <div class="field"><label>Number of cards</label><input id="quantity" type="number" min="1" max="500" step="1" value="8"></div>
+   <div class="field"><label>Horizontal card alignment</label><select id="justify"><option value="space-evenly" selected>Space evenly (equal outer margins)</option><option value="space-between">Space between</option><option value="space-around">Space around</option><option value="center">Center</option><option value="flex-start">Left / Start</option><option value="flex-end">Right / End</option></select></div>
+   <div class="field"><label>Vertical row alignment</label><select id="alignRows"><option value="space-evenly" selected>Space evenly (equal top/bottom margins)</option><option value="space-between">Space between</option><option value="space-around">Space around</option><option value="center">Center</option><option value="flex-start">Top / Start</option><option value="flex-end">Bottom / End</option></select></div>
+   <div class="field"><label>Image fitting</label><select id="fit"><option value="cover">Fill card (crop edges)</option><option value="contain">Fit entire image (may leave space)</option><option value="fill">Stretch to card</option></select></div>
+   <div class="switchrow"><span>Show card outlines in preview</span><input id="outlines" type="checkbox" checked></div>
+   <p class="hint">Cards flow left-to-right and wrap automatically onto the next row.</p>
+  </section>
+  <section class="panel">
+   <h2><span class="step">3</span> Image for all cards</h2>
+   <label class="upload" for="imageInput"><div style="font-size:25px">＋</div><strong>Choose an image</strong><small>JPG, PNG, WEBP or other browser image</small><input id="imageInput" type="file" accept="image/*"><img id="thumb" class="thumb" alt="Selected image preview"></label>
+   <div class="switchrow"><span>Repeat selected image on every card</span><input type="checkbox" id="repeatImage" checked></div>
+   <div class="hint" id="imageName">No image selected yet.</div>
+  </section>
+ </aside>
+ <section class="workspace">
+  <div class="workspace-head"><div><h2>Live page preview</h2><div class="meta" id="pageMeta">A4 · Portrait</div></div><div class="meta" id="fitMeta">Calculating layout…</div></div>
+  <div class="stage" id="stage"><div class="paper" id="paper"><div class="cards" id="cards"></div></div></div>
+  <div class="stats"><div class="stat"><b id="placed">0</b> cards placed</div><div class="stat"><b id="perRow">0</b> per row</div><div class="stat"><b id="rows">0</b> rows needed</div><div class="stat"><b id="overflow">0</b> cards outside page</div></div>
+  <div class="warning" id="warning"></div>
+ </section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let imageUrl='';
+const ids=['pageW','pageH','orientation','margin','gap','cardW','cardH','quantity','fit','justify','alignRows','outlines','repeatImage'];
+const presets={'210,297':'A4','148,210':'A5','176,250':'B5','182,257':'B5 JIS','216,279':'Letter','216,356':'Legal','216,330':'Foolscap'};
+function num(id){return Math.max(0,parseFloat($(id).value)||0)}
+function update(){
+ let pw=num('pageW'),ph=num('pageH'),m=num('margin'),g=num('gap'),cw=num('cardW'),ch=num('cardH'),q=Math.min(500,Math.max(1,Math.floor(num('quantity')||1)));
+ if($('orientation').value==='landscape')[pw,ph]=[ph,pw];
+ const scale=Math.min(680/pw,820/ph,1.15), pagePxW=pw*scale*96,pagePxH=ph*scale*96;
+ const innerW=Math.max(0,pw-2*m),innerH=Math.max(0,ph-2*m);
+ const perRow=cw+g>0?Math.max(0,Math.floor((innerW+g)/(cw+g))):0;
+ const rowCount=ch+g>0?Math.max(0,Math.floor((innerH+g)/(ch+g))):0;
+ const capacity=perRow*rowCount,placed=Math.min(q,capacity),rowsNeeded=perRow?Math.ceil(q/perRow):0,overflow=Math.max(0,q-placed);
+ const paper=$('paper'),cards=$('cards');
+ paper.style.width=pagePxW+'px';paper.style.height=pagePxH+'px';
+ cards.style.setProperty('--margin',(m*scale*96)+'px');cards.style.setProperty('--gap',(g*scale*96)+'px');
+ cards.style.setProperty('--cw',(cw*scale*96)+'px');cards.style.setProperty('--ch',(ch*scale*96)+'px');
+ cards.style.justifyContent=$('justify').value;
+ cards.style.alignContent=$('alignRows').value;
+ cards.innerHTML='';
+ for(let i=0;i<placed;i++){
+  const card=document.createElement('div');card.className='mini-card';
+  if(!$('outlines').checked)card.style.borderColor='transparent';
+  if(imageUrl && $('repeatImage').checked){const img=document.createElement('img');img.src=imageUrl;img.alt='Card image';img.style.objectFit=$('fit').value;card.appendChild(img)}
+  else {const p=document.createElement('div');p.className='placeholder';p.textContent=imageUrl?'Image repeat is off':'Upload an image to fill cards';card.appendChild(p)}
+  cards.appendChild(card);
+ }
+ $('placed').textContent=placed;$('perRow').textContent=perRow;$('rows').textContent=rowsNeeded;$('overflow').textContent=overflow;
+ $('pageMeta').textContent=`${presets[$('pagePreset').value]||'Custom'} · ${$('orientation').value} · ${pw.toFixed(2)} × ${ph.toFixed(2)} in`;
+ $('fitMeta').textContent=`${perRow} across · ${capacity} fit on one page`;
+ const warning=$('warning');
+ if(cw>innerW||ch>innerH){warning.style.display='block';warning.textContent='Card size is larger than the printable area. Reduce card dimensions or page margins.'}
+ else if(overflow){warning.style.display='block';warning.textContent=`Only ${capacity} cards fit on this page. ${overflow} card(s) will not appear in the exported page. Increase page size, reduce card size/gap/margins, or lower the quantity.`}
+ else {warning.style.display='none'}
+}
+$('pagePreset').addEventListener('change',e=>{if(e.target.value!=='custom'){let [w,h]=e.target.value.split(',').map(Number);$('pageW').value=(w/25.4).toFixed(2);$('pageH').value=(h/25.4).toFixed(2)}update()});
+$('pageW').addEventListener('input',()=>$('pagePreset').value='custom');
+$('pageH').addEventListener('input',()=>$('pagePreset').value='custom');
+ids.forEach(id=>$(id).addEventListener('input',update));
+$('imageInput').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(file);$('thumb').src=imageUrl;$('thumb').style.display='block';$('imageName').textContent=file.name;update()});
+$('printBtn').addEventListener('click',()=>window.print());
+$('resetBtn').addEventListener('click',()=>{ids.forEach(id=>{if($(id).type==='checkbox')$(id).checked=(id==='outlines'||id==='repeatImage')});$('pagePreset').value='210,297';$('pageW').value='8.27';$('pageH').value='11.69';$('orientation').value='portrait';$('margin').value='.25';$('gap').value='.08';$('cardW').value='2.5';$('cardH').value='3.5';$('quantity').value='8';$('fit').value='cover';$('justify').value='space-evenly';$('alignRows').value='space-evenly';$('imageInput').value='';if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl='';$('thumb').style.display='none';$('imageName').textContent='No image selected yet.';update()});
+update();
+</script>
+</body>
+</html>
